@@ -7,6 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from .pagination import CustomPagination
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from .schemas import ListPostDetailSchema, PostCreateSchema, PostIdDetailSchema, NotFoundSchema, DeleteSuccessSchema, \
+    PostDetailSchema
 
 
 # Create your views here.
@@ -67,6 +69,13 @@ class ListCreatePostAPIView(ListCreateAPIView):
     queryset = Post.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
+    get_summary = "List Post"
+    get_response_schema = ListPostDetailSchema
+    post_summary = "Create Post"
+    post_request_schema = PostCreateSchema
+    put_response_schema = {
+        "200": PostDetailSchema,
+    }
 
     def perform_create(self, serializer):
         # Assign the user who created the post
@@ -77,4 +86,20 @@ class RetrieveUpdateDestroyPostAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
+    path_params = PostIdDetailSchema
+    get_summary = "Detail Post"
+    get_response_schema = {
+        "404": NotFoundSchema,
+        "200": PostDetailSchema,
+    }
+    put_summary = "Update Post"
+    put_request_schema = PostCreateSchema
+    put_response_schema = {
+        "404": NotFoundSchema,
+        "200": PostDetailSchema,
+    }
+    delete_summary = "Delete Post"
+    delete_response_schema = {
+        "404": NotFoundSchema,
+        "200": DeleteSuccessSchema,
+    }
